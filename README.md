@@ -153,31 +153,6 @@ docs/
 | Graph Policy Delay | Wait 24 hrs post policy assignment |
 | Transcript Unavailability | Retry next execution |
 
-## Setup & Deployment Instructions
-
-1. Clone repository:
-git clone <repo_url>
-cd <repo>
-
-2. Install dependencies:
-pip install -r requirements.txt
-
-3. Set environment variables (or use `.env`):
-GRAPH_TENANT_ID=...
-GRAPH_CLIENT_ID=...
-GRAPH_CLIENT_SECRET=...
-SQL_SERVER=...
-SQL_DATABASE=...
-SQL_USER=...
-SQL_PASSWORD=...
-SQL_PORT=1433
-
-4. Deploy Azure Functions (from `src/*.py`) to Consumption Plan with Managed Identity.
-5. Ensure ADLS containers exist: `teams-meeting-transcripts`, `teams-meeting-ainotes`.
-6. Assign Teams Meeting & Application Access policies to users.
-7. Verify SQL tables (`TeamsMeetingMetadata`, `TeamsHostingUsers`) exist.
-8. Start timer triggers for transcript ingestion and AI notes generation.
-
 ## Summary
 
 This serverless ELT pipeline automates extraction, storage, and transformation of Microsoft Teams transcripts, integrating with Azure SQL, ADLS, and Azure OpenAI.  
