@@ -52,15 +52,51 @@ It ensures automated compliance with meeting transcript retention policies, cent
 
 #### 1. Extraction Layer
 - Authentication: OAuth 2.0 Client Credentials Flow with Microsoft Graph
+
+curl -X POST "https://login.microsoftonline.com/<TENANT_ID>/oauth2/v2.0/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=<CLIENT_ID>" \
+  -d "client_secret=<CLIENT_SECRET>" \
+  -d "scope=https://graph.microsoft.com/.default" \
+  -d "grant_type=client_credentials"
+  
 - Meeting Identification: Fetch official Teams Meeting ID via Graph API
+
+  curl -X GET "https://graph.microsoft.com/v1.0/users/<USER_ID>/onlineMeetings?$filter=joinWebUrl eq '<JOIN_URL>'" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+
 - Transcript Extraction: List & download meeting transcripts
+
+  curl -X GET "https://graph.microsoft.com/v1.0/users/<USER_ID>/onlineMeetings/<MEETING_ID>/transcripts" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+curl -X GET "https://graph.microsoft.com/v1.0/users/<USER_ID>/onlineMeetings/<MEETING_ID>/transcripts/<TRANSCRIPT_ID>/content" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+
 - Data Storage: Metadata to Azure SQL, transcript file to ADLS
+
+Metadata → Azure SQL Database
+Transcript → ADLS (teams-meeting-transcripts/<organizer>/<subject>/<date>/transcript.txt)
 
 #### 2. Loading Layer
 - Timer-triggered function (every 15 mins): Checks and fetches pending transcripts, saves to ADLS, updates SQL
+- Timer-Triggered Function (every 15 mins):
+- Checks SQL for TranscriptStatus = 'PENDING'
+- Fetches transcript from Graph API
+- Saves transcript to ADLS
+- Updates SQL fields:
+TranscriptUrl → Blob URL
+TranscriptStatus → FETCHED
 
 #### 3. Transformation Layer
 - Function triggered on new transcript in ADLS, calls Azure OpenAI for summarization, updates SQL with AI notes
+- Triggered when a new transcript is uploaded to teams-meeting-transcripts
+- Azure Function calls Azure OpenAI for summarization
+- AI Notes stored in teams-meeting-ainotes/<organizer>/<subject>/<date>/ainotes.txt
+- SQL updated:
+AINotesPath → Blob path
+Status = COMPLETED
+MeetingCompletionStatus = SUCCESS
 
 ## Codebase Overview
 
@@ -134,6 +170,28 @@ docs/
   `teams-meeting-transcripts/<organizer>/<subject>/<date>/transcript.txt`
 - **AI Notes:**  
   `teams-meeting-ainotes/<organizer>/<subject>/<date>/ainotes.txt`
+
+##Azure AD & Teams Configuration
+
+- Graph API Permissions (Application & Delegated)
+OnlineMeetingAIInsight.Read.All ✅
+OnlineMeetingArtifact.Read.All ✅
+OnlineMeetingTranscript.Read.All ✅
+OnlineMeetings.Read.All ✅
+User.Read.All ✅
+
+-Teams Policies
+Teams Meeting Policy
+New-CsTeamsMeetingPolicy -Identity "teamsmeeting-policy" -AllowTranscription $true -AllowCloudRecording $true
+Grant-CsTeamsMeetingPolicy -Identity "user@domain.com" -PolicyName "teamsmeeting-policy"
+
+-Teams Application Access Policy
+New-CsApplicationAccessPolicy -AppId <APP_ID> -PolicyName "teams-app-policy" -Description "Allow app to read meeting artifacts"
+Grant-CsApplicationAccessPolicy -PolicyName "teams-app-policy" -Identity "user@domain.com"
+
+
+
+
 
 ## Non-Functional Requirements
 
