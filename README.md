@@ -181,7 +181,3 @@ SQL_PORT=1433
 ## Summary
 
 This serverless ELT pipeline automates extraction, storage, and transformation of Microsoft Teams transcripts, integrating with Azure SQL, ADLS, and Azure OpenAI.  
-It enforces enterprise security, observability, compliance, and produces AI-generated meeting notes for audit-ready, intelligent management of Teams meetings.
-
-
-

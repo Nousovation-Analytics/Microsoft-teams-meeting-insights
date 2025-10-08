@@ -1,0 +1,36 @@
+# Azure Functions
+azure-functions
+
+# Azure Identity (for MSI / ClientSecretCredential)
+azure-identity
+
+# Azure Data Lake
+azure-storage-file-datalake
+
+# Azure Blob Storage (used in AI notes / transcripts)
+azure-storage-blob
+
+# SQL Server connections
+pymssql
+pyodbc
+
+# HTTP requests
+requests
+
+# JSON handling and utilities (though part of stdlib, listing for clarity)
+# json (builtin)
+
+# Logging (builtin)
+# logging (builtin)
+
+# UUID generation (builtin)
+# uuid (builtin)
+
+# Regular expressions (builtin)
+# re (builtin)
+
+# Date and time utilities (builtin)
+# datetime, time (builtin)
+
+# Optional: environment variable handling if using .env file
+python-dotenv
